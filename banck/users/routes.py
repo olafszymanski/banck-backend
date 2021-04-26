@@ -1,3 +1,4 @@
+import bcrypt
 from flask import Blueprint, jsonify, request
 from .models import User
 from .schemas import user_schema, users_schema, user_creation_schema
@@ -29,7 +30,7 @@ def create_user():
     request.json['name'],
     request.json['last_name'],
     request.json['email'],
-    request.json['password']
+    bcrypt.hashpw(request.json['password'].encode('utf8'), bcrypt.gensalt())
   )
   if user.exists():
     return create_error('User already exists!', 409)
@@ -49,7 +50,7 @@ def update_user(user_id):
     if 'email' in request.json:
       user.email = request.json['email']
     if 'password' in request.json:
-      user.password = request.json['password']
+      user.password = bcrypt.hashpw(request.json['password'].encode('utf8'), bcrypt.gensalt())
     if 'balance' in request.json:
       user.balance = request.json['balance']
 
