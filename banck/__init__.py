@@ -13,7 +13,10 @@ def create_app(config_object=DebugConfig):
   app.config.from_object(config_object)
 
   from .users.routes import users
+  from .auth.routes import auth
+
   app.register_blueprint(users)
+  app.register_blueprint(auth)
 
   db.init_app(app)
   ma.init_app(app)
