@@ -2,7 +2,7 @@ import bcrypt
 from flask import Blueprint, jsonify, request
 from .models import User
 from .schemas import user_schema, users_schema, user_creation_schema
-from banck.decorators import is_authenticated, is_authorized
+from banck.auth.decorators import is_authenticated, is_authorized
 from banck.utils import create_error
 
 
