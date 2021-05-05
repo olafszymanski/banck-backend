@@ -2,6 +2,7 @@ import bcrypt
 from flask import Blueprint, jsonify, request
 from .models import User
 from .schemas import user_schema, users_schema, user_creation_schema
+from banck.decorators import is_authenticated, is_authorized
 from banck.utils import create_error
 
 
@@ -9,6 +10,7 @@ users = Blueprint('users', __name__)
 
 
 @users.route('/api/users/<int:user_id>', methods=['GET'])
+@is_authenticated
 def get_user(user_id):
   if user := User.query.filter_by(id=user_id).first():
     return user_schema.dump(user)
@@ -17,6 +19,7 @@ def get_user(user_id):
 
 
 @users.route('/api/users', methods=['GET'])
+@is_authorized
 def get_users():
   return jsonify(users_schema.dump(User.query.all()))
 
@@ -27,10 +30,10 @@ def create_user():
     return create_error(error, 400)
 
   user = User(
-    request.json['name'],
-    request.json['last_name'],
-    request.json['email'],
-    bcrypt.hashpw(request.json['password'].encode('utf8'), bcrypt.gensalt())
+    request.json.get('name'),
+    request.json.get('last_name'),
+    request.json.get('email'),
+    bcrypt.hashpw(request.json.get('password').encode('utf8'), bcrypt.gensalt())
   )
   if user.exists():
     return create_error('User already exists!', 409)
@@ -41,18 +44,19 @@ def create_user():
 
 
 @users.route('/api/users/<int:user_id>', methods=['PUT'])
+@is_authenticated
 def update_user(user_id):
   if user := User.query.filter_by(id=user_id).first():
     if 'name' in request.json:
-      user.name = request.json['name']
+      user.name = request.json.get('name')
     if 'last_name' in request.json:
-      user.last_name = request.json['last_name']
+      user.last_name = request.json.get('last_name')
     if 'email' in request.json:
-      user.email = request.json['email']
+      user.email = request.json.get('email')
     if 'password' in request.json:
-      user.password = bcrypt.hashpw(request.json['password'].encode('utf8'), bcrypt.gensalt())
+      user.password = bcrypt.hashpw(request.json.get('password').encode('utf8'), bcrypt.gensalt())
     if 'balance' in request.json:
-      user.balance = request.json['balance']
+      user.balance = request.json.get('balance')
 
     return user_schema.dump(user.update())
 
@@ -60,6 +64,7 @@ def update_user(user_id):
 
 
 @users.route('/api/users/<int:user_id>', methods=['DELETE'])
+@is_authenticated
 def delete_user(user_id):
   if user := User.query.filter_by(id=user_id).first():
     return user_schema.dump(user.delete())
