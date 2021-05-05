@@ -11,9 +11,8 @@ def is_authenticated(func):
     try:
       user_id = kwargs.get('user_id')
       if user := User.query.filter_by(id=user_id).first():
-        user_id = decode_token(request.args.get('token')).get('sub')
-        is_admin = User.query.filter_by(id=user_id).first().admin
-        if user.id == user_id or is_admin:
+        decoded_user = decode_token(request.args.get('token'))
+        if user.id == user_id or decoded_user.get('admin'):
           return func(*args, **kwargs)
 
         return create_error('Invalid token. Please log in again!', 400)
@@ -30,9 +29,7 @@ def is_authorized(func):
   @wraps(func)
   def wrapper(*args, **kwargs):
     try:
-      user_id = decode_token(request.args.get('token')).get('sub')
-      user = User.query.filter_by(id=user_id).first()
-      if user.admin:
+      if decode_token(request.args.get('token')).get('admin'):
         return func(*args, **kwargs)
 
       return create_error('User is not authorized!', 401)

@@ -10,11 +10,12 @@ def create_error(message, status):
   }
 
 
-def generate_token(user_id):
+def generate_token(user):
   payload = {
     'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=5),
     'iat': datetime.datetime.utcnow(),
-    'sub': user_id,
+    'id': user.id,
+    'admin': user.admin
   }
 
   return jwt.encode(

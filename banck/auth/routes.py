@@ -19,7 +19,7 @@ def login():
 
   if user := User.query.filter_by(email=email).first():
     if bcrypt.checkpw(password.encode('utf8'), user.password.encode('utf8')):
-      return { 'token': generate_token(user.id) }
+      return { 'token': generate_token(user) }
 
     return create_error('Incorrect password!', 403)
 
@@ -42,4 +42,4 @@ def signup():
 
   user.add()
 
-  return { 'token': generate_token(user.id) }
+  return { 'token': generate_token(user) }
